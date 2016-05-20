@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<typeAliases>
+		<typeAlias type="com.capgemini.wdapp.model.Shop" alias="Shop"/>
+		<typeAlias type="com.capgemini.wdapp.model.Sms" alias="Sms"/>
+		<typeAlias type="com.capgemini.wdapp.model.User" alias="User"/>
+		<typeAlias type="com.capgemini.wdapp.model.Device" alias="Device"/>
+		
+	</typeAliases>
+	<mappers>
+		<mapper resource="mapper/ShopMapper.xml" />
+		<mapper resource="mapper/SellerMapper.xml" />
+		<mapper resource="mapper/FindPwdMapper.xml" />
+		<mapper resource="mapper/CategoryMapper.xml" />
+		<mapper resource="mapper/GoodsMapper.xml" />
+		<mapper resource="mapper/SmsMapper.xml" />
+		<mapper resource="mapper/UserMapper.xml" />
+
+		<mapper resource="mapper/DeviceMapper.xml" />
+
+		<mapper resource="mapper/AddressMapper.xml" />
+		<mapper resource="mapper/CartMapper.xml" />
+		<mapper resource="mapper/OrderMapper.xml" />
+		<mapper resource="mapper/AppraisalMapper.xml" />
+		<mapper resource="mapper/AfterSaleMapper.xml" />
+		
+		
+	</mappers>
+</configuration>

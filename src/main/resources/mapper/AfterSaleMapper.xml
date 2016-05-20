@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.capgemini.wdapp.dao.IAfterSaleDao">
+
+	<insert id="addAfterSale" parameterType="com.capgemini.wdapp.model.AfterSale">
+
+		INSERT INTO order_after_sale
+		(
+		order_detail_id,
+		order_master_id,
+		type,
+		status,
+		is_received,
+		reason,
+		detail,
+		money,
+		attach,
+		apply_time
+		)
+		values(
+		#{orderDetailId},
+		#{orderMasterId},
+		#{type},
+		#{status},
+		#{isReceived},
+		#{reason},
+		#{detail},
+		#{money},
+		#{attach},
+		#{applyTime}
+
+		)
+		<selectKey resultType="int" order="AFTER" keyProperty="id">
+			select LAST_INSERT_ID() AS id
+		</selectKey>
+
+	</insert>
+	
+	<update id="updateAfterSale" parameterType="com.capgemini.wdapp.model.AfterSale">
+		update order_after_sale
+
+		<set>
+			<if test="handleResult != null">
+				handle_result=#{handleResult},
+			</if>
+			<if test="handleReason != null">
+				handle_reason=#{handleReason},
+			</if>
+			<if test="handleTime != null">
+				handle_time=#{handleTime},
+			</if>
+			<if test="status != null">
+				status=#{status},
+			</if>
+			<if test="expressNumber != null">
+				express_number=#{expressNumber},
+			</if>
+			<if test="expressCompany != null">
+				express_company=#{expressCompany},
+			</if>
+			<if test="expressTime != null">
+				express_time=#{expressTime},
+			</if>
+			<if test="refundTime != null">
+				refund_time=#{refundTime},
+			</if>
+			<if test="refundCertificate != null">
+				refund_certificate=#{refundCertificate},
+			</if>
+			
+			<if test="appealTitle != null">
+				appeal_title=#{appealTitle},
+			</if>
+			<if test="appealContent != null">
+				appeal_content=#{appealContent},
+			</if>
+			<if test="appealTime != null">
+				appeal_time=#{appealTime},
+			</if>
+			<if test="finishTime != null">
+				finish_time=#{finishTime},
+			</if>
+
+		</set>
+
+		where 1=1
+
+		<if test="id != null">
+			and id = #{id}
+		</if>
+
+		<if test="orderDetailId != null">
+			and order_detail_id = #{orderDetailId}
+		</if>
+	</update>
+	
+    <select id="getAllRejectReasonByType" parameterType="int" resultType="java.util.Map">
+
+		SELECT 
+		type,reason
+		from reject_reason
+		where type=#{type};
+		
+	</select>
+	
+	
+	<select id="getAfterSale" parameterType="map" resultMap="afterSaleMap">
+
+		SELECT 
+		a.id,
+	    a.order_detail_id,
+	    a.type,
+	    a.status,
+	    a.is_received,
+	    a.reason,
+	    a.detail,
+	    a.money,
+	    a.attach,
+	    a.apply_time,
+	    a.handle_result,
+	    a.handle_reason,
+	    a.handle_time,
+	    a.express_number,
+	    a.express_company,
+	    a.express_time,
+	    a.refund_time,
+	    a.refund_certificate,
+	    a.appeal_title,
+	    a.appeal_content,
+	    a.appeal_time,
+	    a.finish_time,
+	    a.status b_status,
+	    b.id b_id,
+		b.order_master_id b_order_master_id,
+		b.price b_price,
+		b.quantity b_quantity,
+		b.goods_id b_goods_id,
+		b.goods_name b_goods_name,
+		b.images b_images,
+		b.description b_description,
+		b.stock_price_id b_stock_price_id,
+		b.spec_value_first b_spec_value_first,
+		b.spec_value_second b_spec_value_second,
+		b.spec_value_third b_spec_value_third
+	    from order_after_sale a left join order_detail b on b.id = a.order_detail_id
+		 where 1=1
+		<if test="id != null">
+			and a.id = #{id}
+		</if>
+		<if test="orderDetailId != null">
+			and a.order_detail_id = #{orderDetailId}
+		</if>
+		<if test="statusList != null">
+				and a.status  in (
+					<foreach collection="statusList" item="item" index="index"
+					separator=",">
+					#{item}
+					</foreach>
+				)
+		</if>
+		
+		<if test="detailList != null">
+				and a.order_detail_id  in (
+					<foreach collection="detailList" item="item" index="index"
+					separator=",">
+					#{item.id}
+					</foreach>
+				)
+		</if>
+		
+		
+	</select>
+
+
+
+
+	<resultMap id="afterSaleMap" type="com.capgemini.wdapp.model.AfterSale">
+		<result property="id" column="id" />
+		<result property="orderDetailId" column="order_detail_id" />
+		<result property="type" column="type" />
+		<result property="status" column="status" />
+		<result property="isReceived" column="is_received" />
+		<result property="reason" column="reason" />
+		<result property="detail" column="detail" />
+		<result property="money" column="money" />
+		<result property="attach" column="attach" />
+		<result property="applyTime" column="apply_time" />
+		
+		<result property="handleResult" column="handle_result" />
+		<result property="handleReason" column="handle_reason" />
+		<result property="handleTime" column="handle_time" />
+		<result property="expressNumber" column="express_number" />
+		<result property="expressCompany" column="express_company" />
+		<result property="expressTime" column="express_time" />
+		<result property="refundTime" column="refund_time" />
+		<result property="refundCertificate" column="refund_certificate" />
+		<result property="appealTitle" column="appeal_title" />
+		<result property="appealContent" column="appeal_content" />
+		<result property="appealTime" column="appeal_time" />
+		<result property="finishTime" column="finish_time" />
+		
+		<association property="orderDetail"
+			javaType="com.capgemini.wdapp.model.OrderDetail">
+			<result property="id" column="b_id" />
+			<result property="orderMasterId" column="b_order_master_id" />
+			<result property="price" column="b_price" />
+			<result property="quantity" column="b_quantity" />
+			<result property="goodsId" column="b_goods_id" />
+			<result property="goodsName" column="b_goods_name" />
+			<result property="images" column="b_images" />
+			<result property="description" column="b_description" />
+			<result property="stockPriceId" column="b_stock_price_id" />
+			<result property="specValueFirst" column="b_spec_value_first" />
+			<result property="specValueSecond" column="b_spec_value_second" />
+			<result property="specValueThird" column="b_spec_value_third" />
+			<result property="asStatus" column="b_status" /> 
+		</association>
+		
+		
+		
+		
+	</resultMap>
+
+	
+
+
+</mapper>

@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  <mapper namespace="com.capgemini.wdapp.dao.IShopDao">
+ 
+  <insert id="addShop" parameterType="com.capgemini.wdapp.model.Shop">
+	  
+	    insert into shop(name,description,sellerid,token,transportexpense,logo,backgroundimage,wechatappkey,wechatappsecret) 
+	    values(#{name},#{description},#{sellerId},#{token},#{transportExpense},#{logoImg},#{backgImg},#{weChatAppKey},#{weChatAppSecret})
+	 <selectKey resultType="int" order="AFTER" keyProperty="id">
+			select LAST_INSERT_ID() AS id
+		</selectKey>
+  </insert>
+  
+  
+
+  
+  <update id="updateShop" parameterType="com.capgemini.wdapp.model.Shop">
+		update shop
+		<set>
+			<if test="name != null">
+				name = #{name},
+			</if>
+			<if test="description != null">
+				description = #{description},
+			</if>
+			<if test="token != null">
+				token = #{token},
+			</if>
+			<if test="transportExpense != null">
+				transportexpense = #{transportExpense},
+			</if>
+			<if test="logoImg != null">
+				logo = #{logoImg},
+			</if>
+			<if test="backgImg != null">
+				backgroundimage = #{backgImg},
+			</if>
+			<if test="weChatAppKey != null">
+				wechatappkey = #{weChatAppKey},
+			</if>
+			<if test="weChatAppSecret != null">
+				wechatappsecret = #{weChatAppSecret},
+			</if>
+			
+			<if test="address != null">
+				address = #{address},
+			</if>
+			<if test="postCode != null">
+				postcode = #{postCode},
+			</if>
+			<if test="contact != null">
+				contact = #{contact},
+			</if>
+			<if test="telephone != null">
+				telephone = #{telephone},
+			</if>
+			<if test="province != null">
+				province = #{province},
+			</if>
+			<if test="city != null">
+				city = #{city},
+			</if>
+			<if test="region != null">
+				region = #{region},
+			</if>
+
+		</set>
+		where sellerid = #{sellerId}
+	</update>
+	
+  
+  
+  	<select id="getShop" parameterType="com.capgemini.wdapp.model.Shop"
+		resultMap="shopMap">
+		select id,name,description,sellerid,token,transportexpense,logo,backgroundimage,address,postcode,contact,telephone,province,city,region,wechatappkey,wechatappsecret from shop
+		where 1=1
+		<if test="name != null">
+				and name = #{name}
+			</if>
+			
+		
+			<if test="transportExpense != null">
+				and transportexpense = #{transportExpense}
+			</if>
+			
+			<if test="sellerId != null">
+				and sellerid = #{sellerId}
+			</if>
+			<if test="id != null">
+				and id = #{id}
+			</if>
+			<if test="weChatAppKey != null">
+				and wechatappkey = #{weChatAppKey}
+			</if>
+			
+			
+	</select>
+
+  <select id="getShopByWeChatAppKey" parameterType="string"
+		resultMap="shopMap">
+		select id,name,description,sellerid,token,transportexpense,logo,backgroundimage,address,postcode,contact,telephone,province,city,region,wechatappkey,wechatappsecret from shop
+		where 1=1 and wechatappkey = #{weChatAppKey}
+	</select>
+
+  
+  
+  
+  <resultMap id="shopMap" type="Shop">
+    <result property="id" column="id" />
+    <result property="name" column="name" />
+    <result property="description" column="description"/>
+    <result property="sellerId" column="sellerid"/>
+    <result property="token" column="token"/>  
+    <result property="transportExpense" column="transportexpense"/>  
+    <result property="logoImg" column="logo"/>  
+    <result property="backgImg" column="backgroundimage"/> 
+    <result property="weChatAppKey" column="wechatappkey"/> 
+    <result property="weChatAppSecret" column="wechatappsecret"/>    
+    
+    <result property="address" column="address"/> 
+    <result property="postCode" column="postcode"/> 
+    <result property="contact" column="contact"/> 
+    <result property="telephone" column="telephone"/>  
+    
+    <result property="province" column="province"/>  
+    <result property="city" column="city"/>  
+    <result property="region" column="region"/>  
+   
+     
+  </resultMap>
+  
+
+  </mapper>

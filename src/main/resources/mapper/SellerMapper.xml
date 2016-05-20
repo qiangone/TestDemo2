@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.capgemini.wdapp.dao.ISellerDao">
+
+	<insert id="registerSeller" parameterType="com.capgemini.wdapp.model.Seller">
+
+		insert into
+		seller(username,password,phonenumber,email)
+		values(#{username},#{password},#{phoneNumber},#{email})
+
+		<selectKey resultType="int" order="AFTER" keyProperty="id">
+			select LAST_INSERT_ID() AS id
+		</selectKey>
+
+	</insert>
+
+
+
+	<update id="updateSeller" parameterType="com.capgemini.wdapp.model.Seller">
+		update seller
+		<set>
+			<if test="phoneNumber != null">
+				phonenumber = #{phoneNumber},
+			</if>
+			<if test="email != null">
+				email = #{email},
+			</if>
+			<if test="password != null">
+				password = #{password},
+			</if>
+
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+
+
+
+	<select id="getSellerById" parameterType="int" resultMap="sellerMap">
+		select
+		id, username,password,phonenumber,email from seller
+		where id=#{id}
+	</select>
+
+	<select id="getSeller" parameterType="com.capgemini.wdapp.model.Seller"
+		resultMap="sellerMap">
+		select id, username,password,phonenumber,email from seller
+		where 1=1
+		<if test="username != null">
+			and username = #{username,jdbcType=VARCHAR}
+		</if>
+		<if test="password != null">
+			and password = #{password,jdbcType=VARCHAR}
+		</if>
+		<if test="phoneNumber != null">
+			and phonenumber = #{phoneNumber,jdbcType=VARCHAR}
+		</if>
+		<if test="id != null">
+			and id = #{id}
+		</if>
+	</select>
+
+
+
+
+
+
+	<resultMap id="sellerMap" type="com.capgemini.wdapp.model.Seller">
+		<result property="id" column="id" />
+		<result property="username" column="username" />
+		<result property="password" column="password" />
+		<result property="phoneNumber" column="phonenumber" />
+		<result property="email" column="email" />
+	</resultMap>
+
+
+</mapper>

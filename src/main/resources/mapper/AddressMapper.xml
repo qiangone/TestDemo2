@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.capgemini.wdapp.dao.IAddressDao">
+
+	<insert id="addAddress" parameterType="com.capgemini.wdapp.model.Address">
+
+		insert into address
+		(
+		userid ,
+		province ,
+		city ,
+		district ,
+		address_detail ,
+		contact_name ,
+		contact_number ,
+		zipcode ,
+		is_default_address
+		)
+		values(
+		#{userId},
+		#{province},
+		#{city},
+		#{district},
+		#{addressDetail},
+		#{contactName},
+		#{contactNumber},
+		#{zipCode},
+		#{isDefaultAddr}
+
+		)
+		<selectKey resultType="int" order="AFTER" keyProperty="id">
+			select LAST_INSERT_ID() AS id
+		</selectKey>
+
+	</insert>
+
+	<insert id="addOrderAddress" parameterType="com.capgemini.wdapp.model.OrderAddress">
+
+		insert into order_address
+		(
+		order_master_id ,
+		province ,
+		city ,
+		district ,
+		address_detail ,
+		contact_name ,
+		contact_number ,
+		zipcode
+		)
+		values(
+		#{orderMasterId},
+		#{province},
+		#{city},
+		#{district},
+		#{addressDetail},
+		#{contactName},
+		#{contactNumber},
+		#{zipCode}
+
+		)
+		<selectKey resultType="int" order="AFTER" keyProperty="id">
+			select LAST_INSERT_ID() AS id
+		</selectKey>
+
+	</insert>
+
+
+	<update id="updateAddress" parameterType="com.capgemini.wdapp.model.Address">
+		update address
+
+		<set>
+			<if test="province != null">
+				province=#{province},
+			</if>
+			<if test="city != null">
+				city=#{city},
+			</if>
+			<if test="district != null">
+				district=#{district},
+			</if>
+			<if test="addressDetail != null">
+				address_detail=#{addressDetail},
+			</if>
+			<if test="contactName != null">
+				contact_name=#{contactName},
+			</if>
+			<if test="contactNumber != null">
+				contact_number=#{contactNumber},
+			</if>
+			<if test="zipCode != null">
+				zipcode=#{zipCode},
+			</if>
+			<if test="isDefaultAddr != null">
+				is_default_address=#{isDefaultAddr},
+			</if>
+
+		</set>
+
+		where 1=1
+
+		<if test="id != null">
+			and id = #{id}
+		</if>
+
+		<if test="userId != null">
+			and userid = #{userId}
+		</if>
+	</update>
+
+
+
+
+	<select id="getAddress" parameterType="map" resultMap="addressMap">
+
+		SELECT id,
+		userid,
+		is_default_address,
+		province,
+		city,
+		district,
+		address_detail,
+		contact_name,
+		contact_number,
+		zipcode
+		from address where 1=1
+		<if test="id != null">
+			and id = #{id}
+		</if>
+		<if test="userId != null">
+			and userid = #{userId}
+		</if>
+		<if test="isDefaultAddr != null">
+			and is_default_address = #{isDefaultAddr}
+		</if>
+
+		order by is_default_address desc
+	</select>
+
+	<select id="getAreaList" parameterType="map" resultMap="areaMap">
+
+		SELECT id,
+		name,
+		parent_id
+		from area where 1=1
+		<if test="id != null">
+			and id = #{id}
+		</if>
+		<if test="parentId != null">
+			and parent_id = #{parentId}
+		</if>
+	</select>
+
+	<select id="getExpressCompList" resultMap="expressMap">
+
+		SELECT 
+		id,
+		abbrev,
+		name,
+		url,
+		logo
+		from express_company
+		
+	</select>
+    <select id="getExpressCompByName" parameterType="String" resultMap="expressMap">
+
+		SELECT 
+		id,
+		abbrev,
+		name,
+		url,
+		logo
+		from express_company
+		where name=#{name}
+		
+	</select>
+
+
+
+
+	<resultMap id="addressMap" type="com.capgemini.wdapp.model.Address">
+		<result property="id" column="id" />
+		<result property="userId" column="userid" />
+		<result property="isDefaultAddr" column="is_default_address" />
+		<result property="province" column="province" />
+		<result property="city" column="city" />
+		<result property="district" column="district" />
+		<result property="addressDetail" column="address_detail" />
+		<result property="contactName" column="contact_name" />
+		<result property="contactNumber" column="contact_number" />
+		<result property="zipCode" column="zipcode" />
+	</resultMap>
+
+	<resultMap id="areaMap" type="com.capgemini.wdapp.model.Area">
+		<result property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="parentId" column="parent_id" />
+
+	</resultMap>
+
+	<resultMap id="expressMap" type="com.capgemini.wdapp.model.ExpressCompany">
+		<result property="id" column="id" />
+		<result property="abbrev" column="abbrev" />
+		<result property="name" column="name" />
+		<result property="url" column="url" />
+		<result property="logo" column="logo" />
+	</resultMap>
+
+
+
+</mapper>

@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.capgemini.wdapp.dao.ICartDao">
+
+	<insert id="addCart" parameterType="com.capgemini.wdapp.model.Cart">
+
+		insert into cart
+		(
+			userid,
+			goods_id,
+			stockprice_id,
+			quantity
+		 )
+		values(
+		#{userId},
+		#{goodsId},
+		#{stockPriceId},
+		#{quantity}
+		)
+		<selectKey resultType="int" order="AFTER" keyProperty="id">
+			select LAST_INSERT_ID() AS id
+		</selectKey>
+
+	</insert>
+	<delete id="deleteCartbyId">
+		delete from cart where id =
+		#{id}
+	</delete>
+	
+	<delete id="deleteCartbyUserId">
+		delete from cart where userid =
+		#{userId}
+	</delete>
+	
+	<delete id="deleteCart" parameterType="Map">
+		delete from cart where 1=1
+		<if test="userId != null">
+				and userid = #{userId}
+		</if>
+		<if test="goodsId != null">
+				and goods_id = #{goodsId}
+		</if>
+		<if test="stockPriceId != null">
+				and stockprice_id = #{stockPriceId}
+		</if>
+		<if test="quantity != null">
+				and quantity = #{quantity}
+		</if>
+	</delete>
+	
+	
+	<insert id="addCardList" parameterType="List">
+		INSERT INTO cart
+		(
+			userid,
+			goods_id,
+			stockprice_id,
+			quantity
+		)
+		VALUES
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+
+			(
+			#{item.userId},
+			#{item.goodsId},
+			#{item.stockPriceId},
+			#{item.quantity}
+			)
+		</foreach>
+
+	</insert>
+	
+	
+	
+	<update id="updateCart" parameterType="com.capgemini.wdapp.model.Cart">
+		update cart
+		<set>
+			<if test="quantity != null">
+				quantity = #{quantity},
+			</if>
+
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	
+	
+	
+	<select id="getCart" parameterType="map" resultMap="cartMap">
+	
+	SELECT 
+	a.id,
+	a.userid,
+	a.goods_id,
+	a.stockprice_id,
+	a.quantity,
+	
+	b.id g_id,
+	b.name g_name,
+	b.shop_id g_shop_id,
+	b.spec_name_first g_spec_name_first,
+	b.spec_name_second g_spec_name_second,
+	b.spec_name_third g_spec_name_third,
+	b.price g_price,
+	b.quantity g_quantity,
+	b.images g_images,
+	b.description g_description,
+	b.excellent_num g_excellent_num,
+	b.medium_num g_medium_num,
+	b.bad_num g_bad_num,
+	b.is_on_sale g_is_on_sale,
+	b.create_time g_create_time,
+	
+	c.id s_id,
+	c.goodsId s_goodsId,
+	c.specValueFirst s_specNameFirst,
+	c.specValueSecond s_specNameSecond,
+	c.specValueThird s_specNameThird,
+	c.quantity s_quantity,
+	c.price s_price
+	
+   from cart a left join goods b on a.goods_id=b.id
+               left join goods_stockprice c on a.stockprice_id=c.id
+    where 1=1
+    <if test="id != null">
+			and a.id = #{id}
+	</if>
+	<if test="userId != null">
+			and a.userid = #{userId}
+	</if>
+	<if test="goodsId != null">
+			and a.goods_id = #{goodsId}
+	</if>
+	<if test="stockPriceId != null">
+			and a.stockprice_id = #{stockPriceId}
+	</if>
+	</select>
+	
+	
+	
+
+
+
+
+
+
+	<resultMap id="cartMap" type="com.capgemini.wdapp.model.Cart">
+		<result property="id" column="id" />
+		<result property="userId" column="userid" />
+		<result property="goodsId" column="goods_id" />
+		<result property="stockPriceId" column="stockprice_id" />
+		<result property="quantity" column="quantity" />
+		<association property="goods" javaType="com.capgemini.wdapp.model.Goods" resultMap="goodsMap"/>  
+		<association property="stockPrice" javaType="com.capgemini.wdapp.model.StockPrice" resultMap="stockPriceMap"/>  
+		
+	</resultMap>
+	
+	<resultMap id="goodsMap" type="com.capgemini.wdapp.model.Goods">
+		<result property="id" column="g_id" />
+		<result property="name" column="g_name" />
+		<result property="shopId" column="g_shop_id" />
+		<result property="specNameFirst" column="g_spec_name_first" />
+		<result property="specNameSecond" column="g_spec_name_second" />
+		<result property="specNameThird" column="g_spec_name_third" />
+		<result property="price" column="g_price" />
+		<result property="quantity" column="g_quantity" />
+		<result property="images" column="g_images" />
+		<result property="description" column="g_description" />
+		<result property="excellentNum" column="g_excellent_num" />
+		<result property="mediumNum" column="g_medium_num" />
+		<result property="badNum" column="g_bad_num" />
+		<result property="IsOnSale" column="g_is_on_sale" />
+		<result property="createTime" column="g_create_time" />
+		
+	</resultMap>
+	
+	<resultMap id="stockPriceMap" type="com.capgemini.wdapp.model.StockPrice">
+		<result property="id" column="s_id" />
+		<result property="goodsId" column="s_goodsId" />
+		<result property="specValueFirst" column="s_specNameFirst" />
+		<result property="specValueSecond" column="s_specNameSecond" />
+		<result property="specValueThird" column="s_specNameThird" />
+		<result property="quantity" column="s_quantity" />
+		<result property="price" column="s_price" />
+	</resultMap>
+	
+
+
+</mapper>

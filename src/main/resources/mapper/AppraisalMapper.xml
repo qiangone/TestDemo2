@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.capgemini.wdapp.dao.IAppraisalDao">
+
+	<insert id="addAppraisal" parameterType="List">
+
+		INSERT INTO appraisal
+		(
+		order_detail_id,
+		level,
+		contents,
+		user_id,
+		goods_id,
+		create_time
+		)
+		values
+		
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+
+			(#{item.orderDetailId},#{item.level},#{item.contents},#{item.userId},#{item.goodsId},#{item.createTime})
+		</foreach>
+		
+		
+
+	</insert>
+	
+	
+	
+	
+	
+	
+	<select id="getAppraisal" parameterType="map" resultMap="appraisalMap">
+	
+	SELECT 
+	a.id,
+	a.order_detail_id,
+	a.level,
+	a.contents,
+	a.user_id,
+	a.goods_id,
+	a.create_time,
+	b.id u_id,
+	b.openid u_openid,
+	b.shopid u_shopid,
+	b.registertime u_registertime,
+	b.nickname u_nickname,
+	b.icon u_icon,
+	b.lastlogintime u_lastlogintime
+    from 
+    appraisal a left join user b on a.user_id = b.id
+   where 1=1
+	<if test="userId != null">
+			and a.user_id = #{userId}
+	</if>
+		<if test="goodsId != null">
+			and a.goods_id = #{goodsId}
+	</if>
+	
+		<if test="showpage != null">
+			limit #{startIndex},#{pageSize}
+		</if>
+	</select>
+	
+	
+	
+
+
+
+
+
+
+	<resultMap id="appraisalMap" type="com.capgemini.wdapp.model.Appraisal">
+		<result property="id" column="id" />
+		<result property="userId" column="user_id" />
+		<result property="goodsId" column="goods_id" />
+		<result property="orderDetailId" column="order_detail_id" />
+		<result property="level" column="level" />
+		<result property="contents" column="contents" />
+		<result property="createTime" column="create_time" />
+		<association property="user" javaType="com.capgemini.wdapp.model.User" resultMap="userMap"/>  
+		
+	</resultMap>
+	
+	
+	<resultMap id="userMap" type="com.capgemini.wdapp.model.User">
+		<result property="id" column="u_id" />
+		<result property="openId" column="u_openid" />
+		<result property="shopId" column="u_shopid" />
+		<result property="registerTime" column="u_registertime" />
+		<result property="nickname" column="u_nickname" />
+		<result property="icon" column="u_icon" />
+		<result property="lastLoginTime" column="u_lastlogintime" />
+	</resultMap>
+	
+	
+
+
+</mapper>

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.capgemini.wdapp.dao.ISmsDao">
+
+	<insert id="saveSms" parameterType="com.capgemini.wdapp.model.Sms">
+
+		insert into sms(securitycode,phonenumber,createdtime,type)
+		values(#{securityCode},#{phoneNumber},#{createdTime},#{type})
+
+	</insert>
+	
+	<update id="updateSms" parameterType="com.capgemini.wdapp.model.Sms">
+		update sms set securitycode = #{securityCode},createdtime = #{createdTime}
+			where id = #{id};
+	</update>
+
+	<select id="getSmsByPhoneNumberAndOrType" parameterType="com.capgemini.wdapp.model.Sms"
+		resultMap="smsMap">
+		select id, securitycode,phonenumber,createdtime,type from sms
+		where 1=1
+		<if test="phoneNumber != null">
+			and phonenumber = #{phoneNumber,jdbcType=VARCHAR}
+		</if>
+		<if test="type != 0">
+			and type = #{type}
+		</if>
+	</select>
+
+
+
+
+
+
+	<resultMap id="smsMap" type="com.capgemini.wdapp.model.Sms">
+		<result property="id" column="id" />
+		<result property="securityCode" column="securitycode" />
+		<result property="phoneNumber" column="phonenumber" />
+		<result property="createdTime" column="createdtime" />
+		<result property="type" column="type" />
+	</resultMap>
+
+
+</mapper>

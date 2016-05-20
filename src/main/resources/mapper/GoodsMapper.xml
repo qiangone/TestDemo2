@@ -1,0 +1,439 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.capgemini.wdapp.dao.IGoodsDao">
+
+	<insert id="addGoods" parameterType="com.capgemini.wdapp.model.Goods">
+
+		INSERT INTO goods
+		(
+		name,
+		shop_id,
+		spec_name_first,
+		spec_name_second,
+		spec_name_third,
+		price,
+		quantity,
+		images,
+		description,
+		create_time
+		)
+		values(#{name},#{shopId},#{specNameFirst},#{specNameSecond},#{specNameThird},#{price},#{quantity},#{images},#{description},#{createTime})
+		<selectKey resultType="int" order="AFTER" keyProperty="id">
+			select LAST_INSERT_ID() AS id
+		</selectKey>
+	</insert>
+
+	<update id="updateGoods" parameterType="com.capgemini.wdapp.model.Goods">
+
+		UPDATE goods
+		<set>
+
+			<if test="name != null">
+				name = #{name},
+			</if>
+			<if test="specNameFirst != null">
+				spec_name_first = #{specNameFirst},
+			</if>
+			<if test="specNameSecond != null">
+				spec_name_second = #{specNameSecond},
+			</if>
+			<if test="specNameThird != null">
+				spec_name_third = #{specNameThird},
+			</if>
+			<if test="price != null">
+				price = #{price},
+			</if>
+			<if test="quantity != null">
+				quantity = #{quantity},
+			</if>
+			<if test="images != null">
+				images = #{images},
+			</if>
+			<if test="description != null">
+				description = #{description},
+			</if>
+			<if test="excellentNum != null">
+				excellent_num = #{excellentNum},
+			</if>
+			<if test="mediumNum != null">
+				medium_num = #{mediumNum},
+			</if>
+			<if test="badNum != null">
+				bad_num = #{badNum},
+			</if>
+			<if test="IsOnSale != null">
+				is_on_sale = #{IsOnSale},
+			</if>
+
+		</set>
+		WHERE id = #{id,jdbcType=INTEGER}
+
+
+	</update>
+
+
+
+	<insert id="addGoodsCategory" parameterType="List">
+		INSERT INTO goods_category
+		(
+		goods_id,
+		category_id
+		)
+		values
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+
+			(#{item.goodsId},#{item.categoryId})
+		</foreach>
+
+	</insert>
+	
+	<insert id="addStockPrice" parameterType="List">
+		INSERT INTO goods_stockprice
+		(
+		goodsId,
+		specValueFirst,
+		specValueSecond,
+		specValueThird,
+		quantity,
+		price
+		)
+		VALUES
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+
+			(
+			${item.goodsId},
+			'${item.specValueFirst}',
+			'${item.specValueSecond}',
+			'${item.SpecValueThird}',
+			${item.quantity},
+			${item.price}
+			)
+		</foreach>
+
+	</insert>
+	
+	<update id="updateStockPrice" parameterType="com.capgemini.wdapp.model.StockPrice">
+
+		UPDATE goods_stockprice
+		
+		<set>
+			<if test="quantity != null">
+				quantity=#{quantity},
+			</if>
+			<if test="price != null">
+				price=#{price},
+			</if>
+			
+
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+		
+
+
+	</update>
+	
+
+	<delete id="deleteStockPrice" parameterType="int">
+		delete from
+		goods_stockprice where goodsId =#{id}
+	</delete>
+	
+	<delete id="deleteGoodsCategory" parameterType="int">
+		delete from
+		goods_category where goods_id =#{id}
+	</delete>
+
+	<delete id="deleteGoods" parameterType="int">
+		delete from
+		goods where id =#{id}
+	</delete>
+
+	<select id="getGoods" parameterType="com.capgemini.wdapp.model.Goods" resultMap="goodsMap">
+		select
+		a.id,
+		a.name,
+		a.shop_id,
+		a.spec_name_first,
+		a.spec_name_second,
+		a.spec_name_third,
+		a.price,
+		a.quantity,
+		a.images,
+		a.description,
+		a.excellent_num,
+		a.medium_num,
+		a.bad_num,
+		a.is_on_sale,
+		a.create_time
+		
+		from goods a 
+		where 1=1
+		<if test="id != null">
+			and a.id = #{id}
+		</if>
+		<if test="shopId != null">
+			and a.shop_id = #{shopId}
+		</if>
+		
+	</select>
+	
+	<select id="getStockPrice" parameterType="com.capgemini.wdapp.model.StockPrice" resultMap="stockPriceMap">
+		select
+		id,
+		goodsId,
+		specValueFirst,
+		specValueSecond,
+		specValueThird,
+		quantity,
+		price
+		
+		from goods_stockprice
+		where 1=1
+		<if test="id != null">
+			and id = #{id}
+		</if>
+		<if test="goodsId != null">
+			and goodsId = #{goodsId}
+		</if>
+		
+	</select>
+	
+	
+	<select id="getGoodsListByPage" parameterType="Map" resultMap="goodsPageMap">
+		select t.*,
+		d.id category_id,
+		d.name category_name,
+		c.id stock_id,
+		c.specValueFirst specValueFirst
+		from
+     (select
+		a.id,
+		a.name,
+		a.shop_id,
+		a.spec_name_first,
+		a.spec_name_second,
+		a.spec_name_third,
+		a.price,
+		a.quantity,
+		a.images,
+		a.description,
+		a.excellent_num,
+		a.medium_num,
+		a.bad_num,
+		a.is_on_sale,
+		a.create_time
+		
+		from goods a
+		where 1=1
+		<if test="id != null">
+			and a.id = #{id}
+		</if>
+		<if test="shopId != null">
+			and a.shop_id = #{shopId}
+		</if>
+		<if test="IsOnSale != null">
+			and a.is_on_sale = #{IsOnSale}
+		</if>
+		<if test="goodsName != null">
+			and a.name like CONCAT('%',#{goodsName},'%')
+		</if>
+		<if test="categoryId != null">
+			and exists (select 1 from goods_category gc  where a.id=gc.goods_id and gc.category_id=#{categoryId})
+		</if>
+		
+		<if test="sortByCreatTime != null and sortByCreatTime=='0'.toString()">
+		   order by a.create_time asc
+		</if>
+		<if test="sortByCreatTime != null and sortByCreatTime=='1'.toString()">
+		   order by a.create_time desc
+		</if>
+		
+		<if test="sortByStock != null and sortByStock=='0'.toString()">
+		   order by a.quantity asc
+		</if>
+		<if test="sortByStock != null and sortByStock=='1'.toString()">
+		   order by a.quantity desc
+		</if>
+		<if test="sortByStock == null and sortByCreatTime==null">
+		   order by a.create_time desc
+		</if>
+		
+		<if test="showpage != null">
+			limit #{startIndex},#{pageSize}
+		</if>
+        )t left join  goods_category b on t.id= b.goods_id  
+           left join  goods_stockprice c on c.goodsId=t.id
+           left join category d on b.category_id=d.id
+           
+           
+        <if test="sortByCreatTime != null and sortByCreatTime=='0'.toString()">
+		   order by t.create_time asc
+		</if>
+		<if test="sortByCreatTime != null and sortByCreatTime=='1'.toString()">
+		   order by t.create_time desc
+		</if>
+		
+		<if test="sortByStock != null and sortByStock=='0'.toString()">
+		   order by t.quantity asc
+		</if>
+		<if test="sortByStock != null and sortByStock=='1'.toString()">
+		   order by t.quantity desc
+		</if>
+		<if test="sortByStock == null and sortByCreatTime==null">
+		   order by t.create_time desc
+		</if>
+		
+	</select>
+	
+	<!-- 
+	<select id="getGoodsListByPage" parameterType="Map" resultMap="goodsPageMap">
+		select
+		a.id,
+		a.name,
+		a.shop_id,
+		a.spec_name_first,
+		a.spec_name_second,
+		a.spec_name_third,
+		a.price,
+		a.quantity,
+		a.images,
+		a.description,
+		a.excellent_num,
+		a.medium_num,
+		a.bad_num,
+		a.is_on_sale,
+		a.create_time,
+		b.category_id category_id,
+		c.id stock_id
+		from goods a left join goods_category b on a.id= b.goods_id
+		left join goods_stockprice c on c.goodsId=a.id
+		where 1=1
+		<if test="id != null">
+			and a.id = #{id}
+		</if>
+		<if test="shopId != null">
+			and a.shop_id = #{shopId}
+		</if>
+		<if test="IsOnSale != null">
+			and a.is_on_sale = #{IsOnSale}
+		</if>
+		<if test="categoryId != null">
+			and b.category_id=#{categoryId}
+		</if>
+		<if test="goodsName != null">
+			and a.name like CONCAT('%',#{goodsName},'%')
+		</if>
+		
+		
+		group by a.id,b.category_id  
+		
+		<if test="sortByStock != null and sortByStock=='0'.toString()">
+		   order by a.quantity+ifnull(sum(c.quantity),0) asc
+		</if>
+		<if test="sortByStock != null and sortByStock=='1'.toString()">
+		   order by a.quantity+ifnull(sum(c.quantity),0) desc
+		</if>
+		
+		<if test="sortByCreatTime != null and sortByCreatTime=='0'.toString()">
+		   order by a.create_time asc
+		</if>
+		<if test="sortByCreatTime != null and sortByCreatTime=='1'.toString()">
+		   order by a.create_time desc
+		</if>
+		
+		
+		<if test="showpage != null">
+			limit #{startIndex},#{pageSize}
+		</if>
+		
+	</select>
+	 -->
+	 
+	 
+	<select id="getGoodsCategory" parameterType="int" resultMap="goodsCategoryMap">
+	select 
+	id,
+	goods_id,
+	category_id
+	from goods_category
+	where goods_id=#{id}
+	</select>
+	
+
+
+
+	<resultMap id="goodsMap" type="com.capgemini.wdapp.model.Goods">
+		<result property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="shopId" column="shop_id" />
+		<result property="specNameFirst" column="spec_name_first" />
+		<result property="specNameSecond" column="spec_name_second" />
+		<result property="specNameThird" column="spec_name_third" />
+		<result property="price" column="price" />
+		<result property="quantity" column="quantity" />
+		<result property="images" column="images" />
+		<result property="description" column="description" />
+		<result property="excellentNum" column="excellent_num" />
+		<result property="mediumNum" column="medium_num" />
+		<result property="badNum" column="bad_num" />
+		<result property="IsOnSale" column="is_on_sale" />
+		<result property="createTime" column="create_time" />
+		
+	</resultMap>
+	
+		<resultMap id="goodsPageMap" type="com.capgemini.wdapp.model.Goods">
+		<result property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="shopId" column="shop_id" />
+		<result property="specNameFirst" column="spec_name_first" />
+		<result property="specNameSecond" column="spec_name_second" />
+		<result property="specNameThird" column="spec_name_third" />
+		<result property="price" column="price" />
+		<result property="quantity" column="quantity" />
+		<result property="images" column="images" />
+		<result property="description" column="description" />
+		<result property="excellentNum" column="excellent_num" />
+		<result property="mediumNum" column="medium_num" />
+		<result property="badNum" column="bad_num" />
+		<result property="IsOnSale" column="is_on_sale" />
+		<result property="createTime" column="create_time" />
+		
+		 <collection property="categoryList" ofType="com.capgemini.wdapp.model.Category">
+		    <result property="id" column="category_id" />
+		    <result property="name" column="category_name" />
+		  </collection>
+		  
+		    <collection property="stockPriceList" ofType="com.capgemini.wdapp.model.StockPrice">
+		    <result property="id" column="stock_id" />
+		    <result property="specValueFirst" column="specValueFirst" />
+		  </collection>
+		  
+	</resultMap>
+	
+	
+	<resultMap id="goodsCategoryMap" type="com.capgemini.wdapp.model.GoodsCategory">
+		<result property="id" column="id" />
+		<result property="goodsId" column="goods_id" />
+		<result property="categoryId" column="category_id" />
+
+	</resultMap>
+	
+	
+	<resultMap id="stockPriceMap" type="com.capgemini.wdapp.model.StockPrice">
+		<result property="id" column="id" />
+		<result property="goodsId" column="goodsId" />
+		<result property="specValueFirst" column="specValueFirst" />
+		<result property="specValueSecond" column="specValueSecond" />
+		<result property="specValueThird" column="specValueThird" />
+		<result property="quantity" column="quantity" />
+		<result property="price" column="price" />
+
+	</resultMap>
+	
+
+
+</mapper>

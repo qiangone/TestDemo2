@@ -1,0 +1,511 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.capgemini.wdapp.dao.IOrderDao">
+
+	<insert id="addOrderMaster" parameterType="com.capgemini.wdapp.model.OrderMaster">
+
+		insert into order_master
+		(
+		order_code,
+		user_id,
+		amount,
+		status,
+		comments,
+		shop_id,
+		create_time,
+		transport_expense
+		)
+		values(
+		#{orderCode},
+		#{userId},
+		#{amount},
+		#{status},
+		#{comments},
+		#{shopId},
+		#{createTime},
+		#{transportExpense}
+		)
+		<selectKey resultType="int" order="AFTER" keyProperty="id">
+			select LAST_INSERT_ID() AS id
+		</selectKey>
+
+	</insert>
+	
+	
+	<update id="updateOrderMaster" parameterType="com.capgemini.wdapp.model.OrderMaster">
+
+		UPDATE order_master
+		<set>
+
+			<if test="status != null">
+				status = #{status},
+			</if>
+			<if test="payTime != null">
+				pay_time = #{payTime},
+			</if>
+			<if test="deliveryTime != null">
+				delivery_time = #{deliveryTime},
+			</if>
+			<if test="dealTime != null">
+				deal_time = #{dealTime},
+			</if>
+			<if test="expressNumber != null">
+				express_number = #{expressNumber},
+			</if>
+			<if test="expressCompany != null">
+				express_company = #{expressCompany},
+			</if>
+			
+			
+			
+			
+
+		</set>
+		WHERE id = #{id,jdbcType=INTEGER}
+
+
+	</update>
+	
+
+	<insert id="addOrderDetail" parameterType="List">
+		INSERT INTO order_detail
+		(
+		order_master_id,
+		price,
+		quantity,
+		goods_id,
+		goods_name,
+		images,
+		description,
+		stock_price_id,
+		spec_value_first,
+		spec_value_second,
+		spec_value_third
+		)
+		VALUES
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+
+			(
+			#{item.orderMasterId},
+			#{item.price},
+			#{item.quantity},
+			#{item.goodsId},
+			#{item.goodsName},
+			#{item.images},
+			#{item.description},
+			#{item.stockPriceId},
+			#{item.specValueFirst},
+			#{item.specValueSecond},
+			#{item.specValueThird}
+			
+			)
+		</foreach>
+
+	</insert>
+	
+	
+	<select id="getOrderBak" parameterType="map" resultMap="orderMasterMap">
+	select 
+		t.* ,
+		b.id b_id,
+		b.order_master_id b_order_master_id,
+		b.price b_price,
+		b.quantity b_quantity,
+		b.goods_id b_goods_id,
+		b.goods_name b_goods_name,
+		b.images b_images,
+		b.description b_description,
+		b.stock_price_id b_stock_price_id,
+		b.spec_value_first b_spec_value_first,
+		b.spec_value_second b_spec_value_second,
+		b.spec_value_third b_spec_value_third,
+		<!-- b.status b_status, -->
+		c.id c_id,
+		c.order_master_id c_order_master_id,
+		c.province c_province,
+		c.city c_city,
+		c.district c_district,
+		c.address_detail c_address_detail,
+		c.contact_name c_contact_name,
+		c.contact_number c_contact_number,
+		c.zipcode c_zipcode
+		from
+			(select
+			a.id,
+			a.order_code,
+			a.user_id,
+			a.amount,
+			a.status,
+			a.comments,
+			a.create_time,
+			a.pay_time,
+			a.delivery_time,
+			a.pay_transaction_no,
+			a.express_number,
+			a.express_company,
+			a.transport_expense,
+			a.shop_id
+			from order_master a 
+			where 1=1
+			<if test="orderMasterId != null">
+				and a.id = #{orderMasterId}
+			</if>
+			<if test="orderCode != null">
+				and a.order_code = #{orderCode}
+			</if>
+			<if test="status != null">
+				and a.status  in (
+					<foreach collection="status" item="item" index="index"
+					separator=",">
+					#{item}
+					</foreach>
+				)
+			</if>
+			
+			<!-- <if test="detailStatus != null">
+			and exists (select 1 from order_detail od where a.id = od.order_master_id 
+				and od.status  in (
+					<foreach collection="detailStatus" item="item" index="index"
+					separator=",">
+					#{item}
+					</foreach>
+				)
+			)
+			</if> -->
+			
+			<if test="detailStatus != null">
+			    and exists (select 1 from order_detail od,order_after_sale sa where  sa.order_detail_id=od.id and od.order_master_id=a.id 
+				and sa.status  in (
+					<foreach collection="detailStatus" item="item" index="index"
+					separator=",">
+					#{item}
+					</foreach>
+				)
+			)
+			</if>
+			
+			
+			<if test="keyWord != null">
+			and exists (select 1 from order_detail od where a.id = od.order_master_id 
+				and (od.goods_name like CONCAT('%',#{keyWord},'%') or  a.order_code=#{keyWord})
+				)
+			</if>
+		
+		
+			<if test="userId != null">
+				and a.user_id = #{userId}
+			</if>
+			<if test="shopId != null">
+			and a.shop_id = #{shopId}
+			</if>
+			order by a.create_time desc
+			<if test="showpage != null">
+				limit #{startIndex},#{pageSize}
+			</if>
+			
+			)t  left join order_detail b on t.id = b.order_master_id
+				left join order_address c on t.id = c.order_master_id
+				
+		where 1=1
+		
+		
+		
+		order by t.create_time desc
+		
+	</select>
+	
+	
+	
+	
+	<select id="countOrderNumbers" parameterType="map" resultType="int">
+	select count(*)
+	from order_master a left join order_detail b on a.id = b.order_master_id
+			left join order_after_sale d on b.id = d.order_detail_id 
+			where 1=1
+	    <if test="status != null">
+				and a.status=#{status}
+		</if>
+		 <if test="asStatus != null">
+				and d.status  in (
+					<foreach collection="asStatus" item="item" index="index"
+					separator=",">
+					#{item}
+					</foreach>
+				)
+		</if>
+		
+		<if test="userId != null">
+				and a.user_id = #{userId}
+			</if>
+			<if test="shopId != null">
+				and a.shop_id = #{shopId}
+			</if>
+			
+	</select>
+	
+	<select id="getOrder" parameterType="map" resultMap="orderMasterMap">
+	select 
+		t.* ,
+		b.id b_id,
+		b.order_master_id b_order_master_id,
+		b.price b_price,
+		b.quantity b_quantity,
+		b.goods_id b_goods_id,
+		b.goods_name b_goods_name,
+		b.images b_images,
+		b.description b_description,
+		b.stock_price_id b_stock_price_id,
+		b.spec_value_first b_spec_value_first,
+		b.spec_value_second b_spec_value_second,
+		b.spec_value_third b_spec_value_third,
+		d.status b_status, 
+		c.id c_id,
+		c.order_master_id c_order_master_id,
+		c.province c_province,
+		c.city c_city,
+		c.district c_district,
+		c.address_detail c_address_detail,
+		c.contact_name c_contact_name,
+		c.contact_number c_contact_number,
+		c.zipcode c_zipcode
+		from
+			(select
+			distinct a.*
+			from order_master a 
+			left join order_detail b on a.id = b.order_master_id
+			left join order_address c on a.id = c.order_master_id
+			left join order_after_sale d on b.id = d.order_detail_id
+			where 1=1
+			<if test="orderMasterId != null">
+				and a.id = #{orderMasterId}
+			</if>
+			<if test="orderDetailId != null">
+				and b.id = #{orderDetailId}
+			</if>
+			
+			<if test="status != null">
+				and a.status  in (
+					<foreach collection="status" item="item" index="index"
+					separator=",">
+					#{item}
+					</foreach>
+				)
+			</if>
+			<if test="detailStatus != null">
+				and d.status  in (
+					<foreach collection="detailStatus" item="item" index="index"
+					separator=",">
+					#{item}
+					</foreach>
+				)
+			</if>
+			<if test="userId != null">
+				and a.user_id = #{userId}
+			</if>
+			<if test="shopId != null">
+				and a.shop_id = #{shopId}
+			</if>
+			<if test="keyWord != null">
+				and (b.goods_name like CONCAT('%',#{keyWord},'%') or  a.order_code=#{keyWord})
+			</if>
+			order by a.create_time desc
+			<if test="showpage != null">
+				limit #{startIndex},#{pageSize}
+			</if>
+			
+		
+			)t  left join order_detail b on t.id = b.order_master_id
+				left join order_address c on t.id = c.order_master_id
+				left join order_after_sale d on b.id = d.order_detail_id
+				
+		where 1=1
+		
+		
+		
+		order by t.create_time desc
+		
+	</select>
+	
+	
+	
+
+<!-- 
+	<select id="getOrder" parameterType="map" resultMap="orderMasterMap">
+		select
+		a.id,
+		a.order_code,
+		a.user_id,
+		a.amount,
+		a.status,
+		a.comments,
+		a.create_time,
+		a.pay_time,
+		a.delivery_time,
+		a.pay_transaction_no,
+		a.express_number,
+		a.express_company,
+		a.transport_expense,
+		b.id b_id,
+		b.order_master_id b_order_master_id,
+		b.price b_price,
+		b.quantity b_quantity,
+		b.goods_id b_goods_id,
+		b.goods_name b_goods_name,
+		b.images b_images,
+		b.description b_description,
+		b.stock_price_id b_stock_price_id,
+		b.spec_value_first b_spec_value_first,
+		b.spec_value_second b_spec_value_second,
+		b.spec_value_third b_spec_value_third,
+		b.status b_status,
+		c.id c_id,
+		c.order_master_id c_order_master_id,
+		c.province c_province,
+		c.city c_city,
+		c.district c_district,
+		c.address_detail c_address_detail,
+		c.contact_name c_contact_name,
+		c.contact_number c_contact_number,
+		c.zipcode c_zipcode
+		from order_master a
+		left join order_detail b on a.id = b.order_master_id
+		left join order_address c on a.id = c.order_master_id
+		left join goods g on g.id = b.goods_id
+		where 1=1
+		<if test="orderMasterId != null">
+			and a.id = #{orderMasterId}
+		</if>
+		<if test="status != null">
+			and a.status  in (
+				<foreach collection="status" item="item" index="index"
+				separator=",">
+				#{item}
+				</foreach>
+			)
+		</if>
+		<if test="detailStatus != null">
+			and b.status  in (
+				<foreach collection="detailStatus" item="item" index="index"
+				separator=",">
+				#{item}
+				</foreach>
+			)
+		</if>
+		<if test="userId != null">
+			and a.user_id = #{userId}
+		</if>
+		<if test="shopId != null">
+			and g.shop_id = #{shopId}
+		</if>
+		<if test="keyWord != null">
+			and (b.goods_name like CONCAT('%',#{keyWord},'%') or  a.order_code=#{keyWord})
+		</if>
+		
+		<if test="showpage != null">
+			limit #{startIndex},#{pageSize}
+		</if>
+		
+	</select>
+
+
+ -->
+
+
+
+
+  <select id="autoHandleSingleOrderStatus" parameterType="java.util.Map" statementType="CALLABLE" > 
+    {
+     call auto_handle_single_order_status(
+     #{confirmDay,jdbcType=VARCHAR,mode=IN},
+     #{appraisalDay,jdbcType=VARCHAR,mode=IN},
+     #{finishDay,jdbcType=VARCHAR,mode=IN},
+     #{asHandleDay,jdbcType=VARCHAR,mode=IN},
+     #{asConfirmDay,jdbcType=VARCHAR,mode=IN},
+     #{asApplyAppealDay,jdbcType=VARCHAR,mode=IN},
+     #{orderMasterId,jdbcType=VARCHAR,mode=IN}
+     )
+     
+    }
+    
+  </select>
+
+
+  <select id="autoHandleAllOrderStatus" parameterType="java.util.Map" statementType="CALLABLE" > 
+    {
+     call auto_handle_all_order_status(
+     #{confirmDay,jdbcType=VARCHAR,mode=IN},
+     #{appraisalDay,jdbcType=VARCHAR,mode=IN},
+     #{finishDay,jdbcType=VARCHAR,mode=IN},
+     #{asHandleDay,jdbcType=VARCHAR,mode=IN},
+     #{asConfirmDay,jdbcType=VARCHAR,mode=IN},
+     #{asApplyAppealDay,jdbcType=VARCHAR,mode=IN}
+     )
+     
+    }
+    
+  </select>
+
+
+
+
+
+
+	<resultMap id="orderMasterMap" type="com.capgemini.wdapp.model.OrderMaster">
+		<result property="id" column="id" />
+		<result property="orderCode" column="order_code" />
+		<result property="userId" column="user_id" />
+		<result property="amount" column="amount" />
+		<result property="status" column="status" />
+		<result property="comments" column="comments" />
+		<result property="createTime" column="create_time" />
+		<result property="payTime" column="pay_time" />
+		<result property="deliveryTime" column="delivery_time" />
+		<result property="dealTime" column="deal_time" />
+		<result property="payTransactionNo" column="pay_transaction_no" />
+		<result property="expressNumber" column="express_number" />
+		<result property="expressCompany" column="express_company" />
+		<result property="transportExpense" column="transport_expense" />
+		<result property="shopId" column="shop_id" />
+
+		<association property="orderAddress"
+			javaType="com.capgemini.wdapp.model.OrderAddress">
+			<result property="id" column="c_id" />
+			<result property="orderMasterId" column="c_order_master_id" />
+			<result property="province" column="c_province" />
+			<result property="city" column="c_city" />
+			<result property="district" column="c_district" />
+			<result property="addressDetail" column="c_address_detail" />
+			<result property="contactName" column="c_contact_name" />
+			<result property="contactNumber" column="c_contact_number" />
+			<result property="zipCode" column="c_zipcode" />
+		</association>
+		<collection property="orderDetailList"
+			ofType="com.capgemini.wdapp.model.OrderDetail">
+			<result property="id" column="b_id" />
+			<result property="orderMasterId" column="b_order_master_id" />
+			<result property="price" column="b_price" />
+			<result property="quantity" column="b_quantity" />
+			<result property="goodsId" column="b_goods_id" />
+			<result property="goodsName" column="b_goods_name" />
+			<result property="images" column="b_images" />
+			<result property="description" column="b_description" />
+			<result property="stockPriceId" column="b_stock_price_id" />
+			<result property="specValueFirst" column="b_spec_value_first" />
+			<result property="specValueSecond" column="b_spec_value_second" />
+			<result property="specValueThird" column="b_spec_value_third" />
+			<result property="asStatus" column="b_status" /> 
+		</collection>
+
+
+	</resultMap>
+
+
+
+
+
+
+
+</mapper>

@@ -1,0 +1,86 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Insert title here</title>
+<script src="./script/jquery-1.9.1.min.js"></script>
+
+<script type="text/javascript">
+
+var host_url=window.location.host;
+
+	function addShop() {
+
+		var shop = {
+			name : 'test_name',
+			description : "This is description",
+			token:"This is token",
+			seller:{id:1,username:"test"}
+			//"seller.id":1,
+			//"seller.username":"test",
+			//sellers:[{id:1,username:"test"},{id:2,username:"test"}],
+			//sellerss:[{id:3,username:"test"},{id:4,username:"test"}]
+		};
+		$.ajax({
+			type : 'POST',
+			data : JSON.stringify(shop),
+			url : 'http://' + host_url + '/weidian/ws/shop/add',
+			dataType : 'json',
+			contentType: "application/json",
+			beforeSend : function(xhr) {
+				xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
+				xhr.setRequestHeader("Access-Control-Allow-Methods", "GET");
+				xhr.setRequestHeader("Access-Control-Max-Age", "60");
+				console.log('add user address');
+			},
+			success : function(result) {
+				console.log("return value 1");
+				console.log(result);
+				console.log("return value 2");
+			},
+			error : function(info) {
+				console.log('error');
+			}
+		});
+
+	}
+	
+	function updateShop() {
+
+		var shop = {
+			id:1,
+			name : 'test_name',
+			description : "This is description",
+			token:"This is token"
+		};
+		$.ajax({
+			type : 'POST',
+			data : shop,
+			url : 'http://' + host_url + '/weidian/ws/shop/update',
+			dataType : 'json',
+			beforeSend : function(xhr) {
+				xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
+				xhr.setRequestHeader("Access-Control-Allow-Methods", "GET");
+				xhr.setRequestHeader("Access-Control-Max-Age", "60");
+				console.log('add user address');
+			},
+			success : function(result) {
+				console.log("return value 1");
+				console.log(result);
+				console.log("return value 2");
+			},
+			error : function(info) {
+				console.log('error');
+			}
+		});
+
+	}
+</script>
+<body>
+	<h2>Hello World!</h2>
+	<br>
+	<input type="button" onclick="addShop()" value="addShop" />
+	<br>
+	<input type="button" onclick="updateShop()" value="updateShop" />
+</body>
+</html>

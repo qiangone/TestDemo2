@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.capgemini.wdapp.dao.ICategoryDao">
+
+	<insert id="addCategory" parameterType="com.capgemini.wdapp.model.Category">
+
+		insert into
+		category(shop_id,name,parent_id)
+		values(#{shopId},#{name},#{parentId})
+
+		<selectKey resultType="int" order="AFTER" keyProperty="id">
+			select LAST_INSERT_ID() AS id
+		</selectKey>
+
+	</insert>
+
+	<delete id="deleteCategory">
+		delete from category where id =
+		#{id}
+	</delete>
+
+	
+
+	<update id="updateCategory" parameterType="com.capgemini.wdapp.model.Category">
+		update category
+		<set>
+			<if test="shopId != null">
+				shop_id = #{shopId},
+			</if>
+			<if test="name != null">
+				name = #{name},
+			</if>
+			<if test="parentId != null">
+				parent_id = #{parentId},
+			</if>
+
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+
+
+	<select id="getCategoryById" parameterType="int" resultMap="categoryMap">
+		select
+		id, shop_id,name,parent_id from category
+		where id=#{id}
+	</select>
+
+	<select id="getAllCategoryList" resultMap="categoryMap" parameterType="int" >
+		select
+		id,
+		shop_id,name,parent_id from category
+		where shop_id=#{id}
+
+	</select>
+	
+	<select id="getBuyerCategoryList" resultMap="buyerCategoryMap" >
+		select t.c_id,t.c_name,t.g_image from
+		(
+		select a.id c_id,
+		       a.name c_name,
+		        c.id g_id,
+			    c.name g_name,
+		        c.images g_image ,
+		        c.create_time
+		
+		
+		from category a left join goods_category b on a.id = b.category_id
+		left join goods c on b.goods_id=c.id
+		where a.shop_id=#{shopId}
+		order by a.id, c.create_time desc
+		) t
+		
+		group by t.c_id
+
+	</select>
+	
+	
+	
+
+	<select id="getCategoryListByParentId" parameterType="int"
+		resultMap="categoryMap">
+		select
+		id, shop_id,name,parent_id from category
+		where
+		parent_id=#{id}
+	</select>
+	
+	<select id="getCategoryByName" parameterType="map"
+		resultMap="categoryMap">
+		select
+		id, shop_id,name,parent_id from category
+		where name like CONCAT('%',#{name},'%') 
+		and shop_id=#{shopId}
+		
+	</select>
+	
+
+
+
+
+
+	<resultMap id="categoryMap" type="com.capgemini.wdapp.model.Category">
+		<result property="id" column="id" />
+		<result property="shopId" column="shop_id" />
+		<result property="name" column="name" />
+		<result property="parentId" column="parent_id" />
+	</resultMap>
+	
+	<resultMap id="buyerCategoryMap" type="com.capgemini.wdapp.model.Category">
+		<result property="id" column="c_id" />
+		<result property="name" column="c_name" />
+		<result property="image" column="g_image" />
+	</resultMap>
+	
+
+
+
+</mapper>

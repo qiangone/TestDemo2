@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.capgemini.wdapp.dao.IFindPwdDao">
+
+	<insert id="addFinwpwd" parameterType="com.capgemini.wdapp.model.FindPassword">
+
+		insert into
+		find_password(phonenumber,verify_number,createtime)
+		values(#{phoneNumber},#{varifyNumber},#{createTime})
+
+		<selectKey resultType="int" order="AFTER" keyProperty="id">
+			select LAST_INSERT_ID() AS id
+		</selectKey>
+
+	</insert>
+
+	<update id="saveFinwpwd" parameterType="com.capgemini.wdapp.model.FindPassword">
+		update find_password
+		<set>
+			<if test="varifyNumber != null">
+				verify_number = #{varifyNumber},
+			</if>
+			<if test="createTime != null">
+				createtime = #{createTime}
+			</if>
+			
+			
+		</set>
+		where phonenumber = #{phoneNumber}
+		<if test="id != null">
+				and id = #{id}
+			</if>
+	</update>
+
+
+	<select id="getFindPwdByPhoneNumber" parameterType="string"
+		resultMap="findPwdMap">
+		select
+		id, phonenumber,verify_number,phonenumber,createtime
+		from find_password
+		where phonenumber=#{phoneNumber}
+	</select>
+
+
+
+	<resultMap id="findPwdMap" type="com.capgemini.wdapp.model.FindPassword">
+		<result property="id" column="id" />
+		<result property="phoneNumber" column="phonenumber" />
+		<result property="varifyNumber" column="verify_number" />
+
+		<result property="createTime" column="createtime" />
+	</resultMap>
+
+
+</mapper>
